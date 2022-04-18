@@ -1,5 +1,9 @@
 README FOR RISK SOFTWARE
 
+Created by Christopher Archibald (archibald@cs.byu.edu)
+Starting from: Interactive RISK program (risk.pyw) created by John Bauman (http://www.baumanfamily.com/john/risk.html).  
+See also: http://modelai.gettysburg.edu/2019/risk/ for python 2.7 version.  
+
 **************************
 Brief Introduction to RISK
 **************************
