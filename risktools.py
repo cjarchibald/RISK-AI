@@ -1,28 +1,31 @@
-import riskgui
-import riskengine
+"""
+This file contains the RISK simulator that consitutes the backbone of the RISK AI Assignment
+"""
+import gui.riskengine as riskengine
 import random
 import zipfile
 import xml.dom.minidom
 import math
-import pickle
 import json
-
-#
-#Code by Chris Archibald, Fall 2014
-#archibald@cse.msstate.edu
-#
 
 class RiskBoard():
     """
     Stores all of the information about the current Risk game that doesn't change
     over the course of the game, things like:
-        - Which territories make up the map
-        - Which territories are connected to which
-        - What the continents are and which territories they are composed of
-        - What the sequence of card turn-in values is
-        - What players are in the game
-        - What pictures are on the cards 
-        - What the set of all cards is
+        
+        Which territories make up the map
+        
+        Which territories are connected to which
+        
+        What the continents are and which territories they are composed of
+        
+        What the sequence of card turn-in values is
+        
+        What players are in the game
+        
+        What pictures are on the cards 
+        
+        What the set of all cards is
     """
     def __init__(self):
         """
@@ -30,42 +33,42 @@ class RiskBoard():
         All of the variables are initially empty.  
         They should be filled in through other function calls
         """
-        # An array of RiskPlayer objects   
+        
         self.players = []               
-        # A dictionary which is indexed by player name
-        # and stores the id number of that player
+        """ An array of RiskPlayer objects """
+        
         self.player_to_id = dict()
-        # A dictionary which is indexed by player id
-        # and stores the player name of that player
+        """ A dictionary which is indexed by player name and stores the id number of that player """
+
         self.id_to_player = dict()
+        """ A dictionary which is indexed by player id and stores the player name of that player """
         
-        # An array of RiskTerritory objects
         self.territories = []           
-        # A dictionary which is indexed by territory name
-        # and stores the id number of that territory
+        """ An array of RiskTerritory objects """
         self.territory_to_id = dict()
-        
-        # An array of RiskCard objects
+        """ A dictionary which is indexed by territory name and stores the id number of that territory """        
+
         self.cards = []                 
-        # A dictionary which is indexed by card name 
-        # (territory name of pictured territory, or wildcard)
-        # Stores the id of that card
+        """ An array of RiskCard objects """ 
+
         self.card_to_id = dict()
-        # An array of string descriptions of the different card pictures
+        """ A dictionary which is indexed by card name (territory name of pictured territory, or wildcard) Stores the id of that card """
+
         self.pictures = []
+        """ An array of string descriptions of the different card pictures """
         
-        # A dictionary of RiskContinent objects
-        # indexed by continent name, stores 
-        # corresponding RiskContinent object
         self.continents = dict()        
+        """ A dictionary of RiskContinent objects indexed by continent name, stores corresponding RiskContinent object """
         
-        # An array of the card turn-in-values 
-        # turn_in_values[i] should give the number of troops
-        # received for the i-th card turn-in
         self.turn_in_values = []
-        # A number specifying the incremental gain in received troops
-        # for card turn-ins beyond the length of turn-in-values array
+        """ 
+         An array of the card turn-in-values 
+         turn_in_values[i] gives the number of troops
+         received for the i-th card turn-in
+        """
+
         self.increment_value = 0
+        """ A number specifying the incremental gain in received troops for card turn-ins beyond the length of turn-in-values array """
         
         
     def from_string(self, s):
@@ -125,7 +128,7 @@ class RiskBoard():
             output_string = output_string + ';'
         output_string = output_string + '|'
         #Continents
-        for n,c in self.continents.iteritems():
+        for n,c in iter(self.continents.items()):
             output_string = output_string + c.to_string() + ';'
         output_string = output_string + '|'
         #Cards 
@@ -145,22 +148,24 @@ class RiskBoard():
         return output_string
         
         
-    def shuffle_players(self):
-        """Randomize the player order.  Make sure everything is right after that"""
-        player_order = range(len(self.players))
-        random.shuffle(player_order)
+    # def shuffle_players(self):
+    #     """
+    #     Randomize the player order.  Make sure everything is right after that
+    #     """
+    #     player_order = range(len(self.players))
+    #     random.shuffle(player_order)
         
-        shuffled_players = []
-        player_counter = 0
-        for i in player_order:
-            p = self.players[i]
-            p.id = player_counter
-            shuffled_players.append(p)
-            self.player_to_id[p.name] = p.id
-            self.id_to_player[p.id] = p.name
-            player_counter += 1
+    #     shuffled_players = []
+    #     player_counter = 0
+    #     for i in player_order:
+    #         p = self.players[i]
+    #         p.id = player_counter
+    #         shuffled_players.append(p)
+    #         self.player_to_id[p.name] = p.id
+    #         self.id_to_player[p.id] = p.name
+    #         player_counter += 1
             
-        self.players = shuffled_players
+    #     self.players = shuffled_players
         
         
     def add_player(self, player):
@@ -206,35 +211,38 @@ class RiskBoard():
         
     def set_increment_value(self, iv):
         """Set the increment value for card turn-ins beyond the end of turn_in_values"""
-        self.increment_value = iv
+        self.increment_value = iv    
             
     def print_board(self):
         """Display the Risk Board to the output."""
-        print 'RISK BOARD'
+        print('RISK BOARD')
         #PRINT TERRITORIES BY CONTINENT
-        print 'CONTINENTS'
+        print('CONTINENTS')
         for c in self.continents.values():
             c.print_continent(self)
         
         #PRINT CARDS
-        print 'CARDS'
+        print('CARDS')
         for c in self.cards:
             c.print_card(self)
             
         #PRINT PLAYERS
-        print 'PLAYERS'
+        print('PLAYERS')
         for p in self.players:
             p.print_player(self)
             
 class RiskTerritory():
     """Stores all of the information for a territory"""
     def __init__(self, name, id):
-        # The name of the territory (a string)
         self.name = name
-        # The id number of the territory (an integer)
+        """ The name of the territory (a string) """
+        
         self.id = id
-        # An list of the id numbers of all territories neighboring this one
+        """ The id number of the territory (an integer) """
+
         self.neighbors = []
+        """ An list of the id numbers of all territories neighboring this one """
+
     
     def add_neighbor(self, neighbor):
         """Add a neighbor id to the neighbor list"""
@@ -243,15 +251,15 @@ class RiskTerritory():
     def print_territory(self, board, indent=0):
         """Display information about this territory to the output"""
         for i in range(indent):
-            print ' ',
-        print '[', self.name, '] (', self.id, ')'
+            print(' ',)
+        print('[', self.name, '] (', self.id, ')')
         for i in range(indent+2):
-            print ' ',
-        print 'Neighbors:'
+            print(' ',)
+        print('Neighbors:')
         for n in self.neighbors:
             for i in range(indent+3):
-                print ' ',
-            print board.territories[n].name
+                print(' ',)
+            print(board.territories[n].name)
     
     def to_string(self):
         """Save the current Territory information to a string"""
@@ -269,34 +277,37 @@ class RiskPlayer():
     """Stores all information about a player in the game"""
     def __init__(self, name, id, free_armies, conquered_territory):
         """Initializes the various components of this RiskPlayer object"""
-        # The Player's name (string)
         self.name = name
-        # The Player's id (integer)
+        """ The Player's name (string) """
+        
         self.id = id
-        # A list of card id numbers that this player holds (integers)
+        """ The Player's id (integer) """
+
         self.cards = []
-        # The number of armies this player has, waiting to be placed on the board
+        """ A list of card id numbers that this player holds (integers) """
+
         self.free_armies = free_armies
-        # A boolean stating whether or not this player conquered a territory on 
-        # their current turn
+        """ The number of armies this player has in hand, waiting to be placed on the board """
+
         self.conquered_territory = conquered_territory
+        """ A boolean stating whether or not this player conquered a territory on their current turn """
     
     def add_card(self, card):
         """Adds a card (card id number) to the player's list of card ids"""
         self.cards.append(card)
     
     def add_armies(self, n):
-        """Adds a number of armies to the player's free_armies count"""
+        """Adds a number (n) of armies to the player's free_armies count"""
         self.free_armies += n
     
     def print_player(self, board, indent=0):
         """Displays information about this player to the output"""
         for i in range(indent):
-            print ' ',
-        print '<', self.name, '> (', self.free_armies, ' free armies )'
+            print(' ',)
+        print('<', self.name, '[', self.id, ']> (', self.free_armies, ' free armies )')
         for i in range(indent+2):
-            print ' ',
-        print 'Cards:'
+            print(' ',)
+        print('Cards:')
         for c in self.cards:
             board.cards[c].print_card(board, indent+3)
         
@@ -324,18 +335,22 @@ class RiskCard():
     """Stores all the information for a risk card"""
     def __init__(self, territory, picture, id):
         """Initializes card information"""
-        # The territory id number of the territory pictured on the card
+
         self.territory = territory
-        # The picture on the card
+        """ The territory id number of the territory pictured on the card """
+        
         self.picture = picture
-        # The id number of this card
+        """ The picture on the card """
+
         self.id = id
+        """ The id number of this card """
+
     
     def print_card(self, board, indent=0):
         """Displays information about this card to the output"""
         for i in range(indent):
-            print ' ',
-        print board.territories[self.territory].name, ' : ', self.picture
+            print(' ',)
+        print(board.territories[self.territory].name, ' : ', self.picture)
         
     def to_string(self):
         """Saves card information to a string"""
@@ -353,15 +368,18 @@ class RiskContinent():
     """Stores all information related to a continent"""
     def __init__(self, name, reward):
         """Initializes the continent information"""
-        # The name of this continent (string)
         self.name = name
-        # The reward for this continent 
-        # This is the number of troops bonus that a player gets if the player 
-        # owns all of the territories in this continent
+        """The name of this continent (string) """
+        
         self.reward = reward
-        # A list of the territory id numbers of the territories in this continent
+        """
+         The reward for this continent 
+         This is the number of troops bonus that a player gets if the player 
+         owns all of the territories in this continent
+        """
         self.territories = []
-    
+        """ A list of the territory id numbers of the territories in this continent"""        
+
     def add_territory(self, territory):
         """Adds a territory to this continent"""
         if territory not in self.territories:
@@ -370,8 +388,8 @@ class RiskContinent():
     def print_continent(self,board,indent=0):
         """Displays information about continent to output"""
         for i in range(indent):
-            print ' ',
-        print '{', self.name, '} : ', self.reward
+            print(' ',)
+        print('{', self.name, '} : ', self.reward)
         for t in self.territories:
             board.territories[t].print_territory(board, indent+2)
     
@@ -412,40 +430,50 @@ class RiskState():
     def __init__(self, players, armies, owners, current_player, turn_type, turn_in_number, last_attacker, last_defender, cards, board):
         """Initializes a RiskState object"""
     
-        # An array of RiskPlayer objects (the players in the game)
         self.players = players
+        """An array of RiskPlayer objects (the players in the game)"""
         
-        # An array of integers, indexed by territory id number, that 
-        # stores the number of armies on that territory
         self.armies = armies
-        
-        # An array of integers, indexed by territory id number, that 
-        # stores the player id number of the player who owns that territory
+        """
+         An array of integers, indexed by territory id number, that 
+         stores the number of armies on that territory
+        """
         self.owners = owners
-        
-        # The player id number of the current player (player whose turn it is)
+        """
+         An array of integers, indexed by territory id number, that 
+         stores the player id number of the player who owns that territory
+        """
         self.current_player = current_player
+        """ The player id number of the current player (player whose turn it is) """
         
-        # What kind of turn is it currently 
-        # Choices = (PreAssign, PrePlace, Place, TurnInCards, Attack
-        # Occupy, Fortify, GameOver)
         self.turn_type = turn_type
-        
-        # A list of all the card id numbers of the cards still in the deck
+        """
+         What kind of turn is it currently 
+         Choices = (PreAssign, PrePlace, Place, TurnInCards, Attack, Occupy, Fortify, GameOver)
+        """
         self.cards = cards
-        
-        # How many card sets have been turned in?
+        """ A list of all the card id numbers of the cards still in the deck """
+
         self.turn_in_number = turn_in_number
+        """ How many card sets have been turned in? """
         
-        # What is the territory id of the last territory that was attacking/defending 
-        # Important to determine troop movements after territory is conquered
         self.last_attacker = last_attacker
+        """
+         What is the territory id of the last territory that was attacking 
+         Important to determine troop movements after territory is conquered
+        """
         self.last_defender = last_defender
+        """
+         What is the territory id of the last territory that was defending 
+         Important to determine troop movements after territory is conquered
+        """
         
-        # A RiskBoard object that stores all the non-changing information about
-        # this risk game
         self.board = board
-        
+        """
+         A RiskBoard object that stores all the non-changing information about
+         this risk game
+        """
+
     def to_string(self):
         """Saves this state to a string"""
         s = 'RISKSTATE|'
@@ -463,7 +491,7 @@ class RiskState():
         """Loads this state from a string"""
         ss = s.split('|')
         if ss[0] != 'RISKSTATE':
-            print 'THIS IS AN INVALID RISKSTATE'
+            print('THIS IS AN INVALID RISKSTATE')
         ps = ss[1].split(';')
         self.players = []
         for p in ps:
@@ -484,22 +512,22 @@ class RiskState():
         
     def print_state(self):
         """Displays information about this state to the output"""
-        print 'PLAYERS'
+        print('PLAYERS')
         for p in self.players:
             p.print_player(self.board)
         
-        print 'OWNERS/ARMIES'
+        print('OWNERS/ARMIES')
         for i in range(len(self.armies)):
             if self.owners[i] in self.board.id_to_player:
-                print self.board.territories[i].name, '[', self.board.id_to_player[self.owners[i]], '] : ', self.armies[i]
+                print(self.board.territories[i].name, '[', self.board.id_to_player[self.owners[i]], '] : ', self.armies[i])
             else:
-                print self.board.territories[i].name, '[', self.owners[i], '] : ', self.armies[i]
+                print(self.board.territories[i].name, '[', self.owners[i], '] : ', self.armies[i])
         
-        if self.current_player < len(self.board.players):
-            print 'CURRENT PLAYER: ', self.board.players[self.current_player].name, '[', self.current_player, ']'
+        if self.current_player < len(self.players):
+            print('CURRENT PLAYER: ', self.players[self.current_player].name, '[', self.current_player, ']')
         else:
-            print 'CURRENT PLAYER: ??? [', self.current_player, ']'
-        print len(self.cards), ' CARDS LEFT'
+            print('CURRENT PLAYER: ??? [', self.current_player, ']')
+        print(len(self.cards), ' CARDS LEFT')
         
     def copy_state(self):
         """
@@ -516,60 +544,100 @@ class RiskAction():
     def __init__(self, type, to_territory, from_territory, troops):
         """Initializes a RiskAction"""
         
-        # What kind of action this is
-        # types = (PreAssign, PrePlace, Place, TurnInCards, Attack
-        # Occupy, Fortify)
         self.type = type
+        """
+         What kind of action this is? Should be a string
+         possible types = (PreAssign, PrePlace, Place, TurnInCards, Attack, Occupy, Fortify)
+        """
         
-        # This stores the territory id of the place the action is going
-        # For Each type it contains:
-        #       PreAssign: The territory id being chosen by player
-        #       PrePlace:  The territory id of the territory where troop is being placed
-        #       Place: The territory id of the territory where troop is being placed
-        #       TurnInCards: The card id of first of the cards being turned in, or None, if there are no cards to turn in
-        #       Attack: The territory id of the territory being attacked
-        #       Occupy: The territory id of the territory into which troops are moving
-        #       Fortify: The territory id of the territory into which troops are moving
         self.to_territory = to_territory
-        
-        # This stores the territory id of the place the action is coming from
-        # For Each type it contains:
-        #       PreAssign: None
-        #       PrePlace:  None
-        #       Place: None
-        #       TurnInCards: The card id of second of the cards being turned in, or None, if there are no cards to turn in
-        #       Attack: The territory id of the territory doing the attacking
-        #       Occupy: The territory id of the territory from which troops are moving
-        #       Fortify: The territory id of the territory from which troops are moving
+        """
+         This stores the territory id of the place the action is going
+         For Each type it contains:
+               
+                PreAssign: The territory id being chosen by player
+               
+                PrePlace:  The territory id of the territory where troop is being placed
+               
+                Place: The territory id of the territory where troop is being placed
+                
+                TurnInCards: The card id of first of the cards being turned in, or None, if there are no cards to turn in
+               
+                Attack: The territory id of the territory being attacked
+               
+                Occupy: The territory id of the territory into which troops are moving
+               
+                Fortify: The territory id of the territory into which troops are moving
+        """
+
         self.from_territory = from_territory
+        """
+         This stores the territory id of the place the action is coming from
+         For Each type it contains:
+
+                PreAssign: None
+         
+                PrePlace:  None
+         
+                Place: None
+         
+                TurnInCards: The card id of second of the cards being turned in, or None, if there are no cards to turn in
+         
+                Attack: The territory id of the territory doing the attacking
+         
+                Occupy: The territory id of the territory from which troops are moving
+         
+                Fortify: The territory id of the territory from which troops are moving
+        """
         
-        # This stores the number of troops involved in the action
-        # For Each type it contains:
-        #       PreAssign: None
-        #       PrePlace:  None
-        #       Place: None
-        #       TurnInCards: The card id of third of the cards being turned in, or None, if there are no cards to turn in
-        #       Attack: None
-        #       Occupy: Number of troops moving into conquered territory
-        #       Fortify: Number of troops moving to other territory
         self.troops = troops
-        
+        """
+         This stores the number of troops involved in the action
+         For Each type it contains:
+               
+                PreAssign: None
+               
+                PrePlace:  None
+               
+                Place: None
+               
+                TurnInCards: The card id of third of the cards being turned in, or None, if there are no cards to turn in
+               
+                Attack: None
+               
+                Occupy: Number of troops moving into conquered territory
+               
+                Fortify: Number of troops moving to other territory
+        """
+
     def print_action(self):
         """Displays information about this action to the output"""
-        print self.description()
+        print(self.description())
         
     def description(self, newline=False):
+        """returns string description of this action, useful for display"""
         d = ""
         d = d + str(self.type) 
         if newline:
             d = d + "\n"
-        d = d + ' FROM: ' + str(self.from_territory) 
+        if self.type == 'TurnInCards':
+            d = d + ' CARD 1: ' + str(self.from_territory)
+        elif self.type == 'Attack' or self.type == 'Occupy' or self.type == 'Fortify':
+            d = d + ' FROM: ' + str(self.from_territory) 
         if newline:
             d = d + "\n"
-        d = d + ' TO: ' + str(self.to_territory) 
+        if self.type == 'TurnInCards':
+            d = d + ' CARD 2: ' + str(self.to_territory) 
+        elif self.type == 'Place' or self.type == 'PrePlace':
+            d = d + ' IN: ' + str(self.to_territory) 
+        else:
+            d = d + ' TO: ' + str(self.to_territory) 
         if newline:
             d = d + "\n"
-        d = d + ' NUM: ' + str(self.troops)
+        if self.type == 'TurnInCards':
+            d = d + ' CARD 3: ' + str(self.troops)
+        elif self.type == 'Occupy' or self.type == 'Fortify':
+            d = d + ' NUM: ' + str(self.troops)
         return d
         
     def to_string(self):
@@ -581,7 +649,7 @@ class RiskAction():
         """Loads this action from a string"""
         ss = s.split('|')
         if ss[0] != 'RISKACTION':
-            print 'THIS IS NOT A RISK ACTION STRING!'
+            print('THIS IS NOT A RISK ACTION STRING!')
         self.type = json.loads(ss[1])
         self.from_territory = json.loads(ss[2])
         self.to_territory = json.loads(ss[3])
@@ -594,24 +662,28 @@ def translateAction(state, action):
     """
     
     if action.type == 'PreAssign' or action.type == 'PrePlace' or action.type == 'Place':
-        return filter(lambda x:x.name == action.to_territory, riskengine.territories.values())[0]
+        # return filter(lambda x:x.name == action.to_territory, riskengine.territories.values())[0]
+        return riskengine.territories[action.to_territory]
     elif action.type == 'TurnInCards':
         if action.to_territory is None:
             return None,None,None
         else:
-            return filter(lambda x:x.territory == state.board.territories[state.board.cards[action.to_territory].territory].name, riskengine.currentplayer.cards)[0],filter(lambda x:x.territory == state.board.territories[state.board.cards[action.from_territory].territory].name, riskengine.currentplayer.cards)[0],filter(lambda x:x.territory == state.board.territories[state.board.cards[action.troops].territory].name, riskengine.currentplayer.cards)[0]
+            return list(filter(lambda x:x.territory == state.board.territories[state.board.cards[action.to_territory].territory].name, riskengine.currentplayer.cards))[0],list(filter(lambda x:x.territory == state.board.territories[state.board.cards[action.from_territory].territory].name, riskengine.currentplayer.cards))[0],list(filter(lambda x:x.territory == state.board.territories[state.board.cards[action.troops].territory].name, riskengine.currentplayer.cards))[0]
+
     elif action.type == 'Attack':
         if action.to_territory is None:
             return None,None
-        return filter(lambda x:x.name == action.from_territory, riskengine.territories.values())[0], filter(lambda x:x.name == action.to_territory, riskengine.territories.values())[0]
+        # return filter(lambda x:x.name == action.from_territory, riskengine.territories.values())[0], filter(lambda x:x.name == action.to_territory, riskengine.territories.values())[0]
+        return riskengine.territories[action.from_territory], riskengine.territories[action.to_territory]
     elif action.type == 'Occupy':
         return action.troops
     elif action.type == 'Fortify':
         if action.to_territory is None:
             return None,None,0
-        return filter(lambda x:x.name == action.from_territory, riskengine.territories.values())[0], filter(lambda x:x.name == action.to_territory, riskengine.territories.values())[0], action.troops
+        # return filter(lambda x:x.name == action.from_territory, riskengine.territories.values())[0], filter(lambda x:x.name == action.to_territory, riskengine.territories.values())[0], action.troops
+        return riskengine.territories[action.from_territory], riskengine.territories[action.to_territory], action.troops
     else:
-        print 'ILLEGAL ACTION TYPE!' 
+        print('ILLEGAL ACTION TYPE!' )
         
 def simulateAction(input_state, action):
     """
@@ -645,7 +717,7 @@ def simulateAction(input_state, action):
             simulateFortifyAction(s, action)
             advance_player = True
         else:
-            print 'ILLEGAL ACTION TYPE!' 
+            print('ILLEGAL ACTION TYPE!')
         
         rstates = [s]
         rsprobs = [1]
@@ -663,6 +735,10 @@ def simulateAction(input_state, action):
         
         
 def getReinforcementNum(state, player_id):
+    """
+    Determine how many troop reinforcements the indicated player should get in the given state.
+    This is calculated from the number of territories and continents they occupy
+    """
     #Count territories owned by the current player
     territory_num = state.owners.count(player_id)
     #Get that divided by three (with a min of three)
@@ -670,7 +746,7 @@ def getReinforcementNum(state, player_id):
     
     #See if they own all of any continents
     continent_troops = 0
-    for c in state.board.continents.itervalues():
+    for c in iter(state.board.continents.values()):
         owned = True
         for t in c.territories:
             if state.owners[t] != player_id:
@@ -735,7 +811,7 @@ def nextType(state, action):
         #Done with turn, now next players turn
         state.turn_type = 'TurnInCards'
     else:
-        print 'ILLEGAL ACTION TYPE!'
+        print('ILLEGAL ACTION TYPE!')
         
 def getAllowedActions(state):
     """
@@ -758,7 +834,7 @@ def getAllowedActions(state):
     elif state.turn_type == 'Fortify':
         return getFortifyActions(state)
     else:
-        print 'THE STATE\'S TURN PHASE OF > ', state.turn_type, '< IS NOT VALID'
+        print('THE STATE\'S TURN PHASE OF > ', state.turn_type, '< IS NOT VALID')
 
 def getPreAssignActions(state):
     """Returns a list of all the PreAssign actions possible in this state"""
@@ -781,7 +857,7 @@ def simulatePreAssignAction(state, action):
     idx = state.board.territory_to_id[action.to_territory]
     
     if state.owners[idx] != None or state.armies[idx] != 0 or state.players[state.current_player].free_armies < 1:
-        print 'INVALID PREASSIGN ACTION!'
+        print('INVALID PREASSIGN ACTION!')
         
     state.owners[idx] = state.current_player
     state.armies[idx] = 1
@@ -810,8 +886,8 @@ def simulatePrePlaceAction(state, action):
         state.armies[idx] = state.armies[idx] + 1
         state.players[state.current_player].free_armies -= 1
     else:
-        print 'INVALID PREPLACE ACTION:'
-        print 'NO PREPLACE ACTION WILL OCCUR'
+        print('INVALID PREPLACE ACTION:')
+        print('NO PREPLACE ACTION WILL OCCUR')
     
 def getTurnInCardsActions(state):
     """Returns a list of all the TurnInCards actions possible in this state"""
@@ -836,7 +912,7 @@ def getTurnInCardsActions(state):
     return actions
 
 def isCardSet(state, c1, c2, c3):
-    """See if this trio of cards can be turned in (is it a set)"""
+    """See if this trio of cards can be turned in (is it a set?)"""
     
     #Get the pictures on the cards
     p1 = state.board.cards[c1].picture
@@ -858,11 +934,11 @@ def isCardSet(state, c1, c2, c3):
     return True
 
 def pause():
-    """Utility if you ever want to pause to see output at some point."""
+    """Utility if you ever want to pause to see output at some point. For debugging"""
     i = raw_input('Paused. Press a key to continue . . . ')
     
 def getTurnInValue(state):
-    """See what the current turn-in-value is"""
+    """See what the current card turn-in-value is"""
     
     value = 0
     if state.turn_in_number >= len(state.board.turn_in_values):
@@ -878,16 +954,16 @@ def getTurnInValue(state):
 def simulateTurnInCardsAction(state, action):
     """
     Execute the given action in the given state.  This will modify the state to 
-    reflect the outcome of the state.
+    reflect the outcome of the action.
     """
     #See if they want to turn in cards
     if action.to_territory is None:
         return
         
     if (not isCardSet(state, action.to_territory, action.from_territory, action.troops)) or action.to_territory not in state.players[state.current_player].cards or action.from_territory not in state.players[state.current_player].cards or action.troops not in state.players[state.current_player].cards:
-        print 'INVALID TURN-IN-CARDS ACTION!'
+        print('INVALID TURN-IN-CARDS ACTION!')
         action.print_action()
-        print 'NO TURN-IN-CARDS ACTION WILL BE TAKEN'
+        print('NO TURN-IN-CARDS ACTION WILL BE TAKEN')
         
     #Modify cards appropriately (cards indices are stored in to_territory, from_territory, and troops
     #Add turn in value to players free_armies
@@ -903,8 +979,10 @@ def simulateTurnInCardsAction(state, action):
         state.players[state.current_player].cards.remove(i)
     
 def getPlaceActions(state):
-    """Returns a list of all the Place actions possible in this state"""
-    #An action is to place a troop in a territory occupied by the current player
+    """
+     Returns a list of all the Place actions possible in this state
+     An action is to place a troop in a territory occupied by the current player
+    """
     actions = []
     
     for i in range(len(state.owners)):
@@ -925,14 +1003,15 @@ def simulatePlaceAction(state, action):
         state.armies[idx] = state.armies[idx] + 1
         state.players[state.current_player].free_armies -= 1
     else:
-        print 'INVALID PLACE ACTION: '
+        print('INVALID PLACE ACTION: ')
         action.print_action()
-        print 'NO PLACE ACTION WILL OCCUR'
+        print('NO PLACE ACTION WILL OCCUR')
     
 def getAttackActions(state):
-    """Returns a list of all the Attack actions possible in this state"""
-    
-    #An action is to attack another territory from a territory owned by the current_player where 2 or more troops are
+    """
+     Returns a list of all the Attack actions possible in this state
+     An action is to attack another territory from a territory owned by the current_player where 2 or more troops are
+    """
     actions = []
     
     for i in range(len(state.owners)):
@@ -990,7 +1069,7 @@ def getAttackOutcome(a_num_dice, d_num_dice, outcome_index):
         elif outcome_index == 1:
             attacker_loss = 1
         else:
-            print 'Attack Outcome Index invalid'
+            print('Attack Outcome Index invalid')
         
     elif total_loss == 2:
         if outcome_index == 0:
@@ -1001,9 +1080,9 @@ def getAttackOutcome(a_num_dice, d_num_dice, outcome_index):
         elif outcome_index == 2:
             attacker_loss = 2
         else:
-            print 'Attack Outcome index invalid'
+            print('Attack Outcome index invalid')
     else:
-        print 'Total Loss is invalid.  It is: ', total_loss, ' A Num Dice: ', a_num_dice, 'D Num Dice: ', d_num_dice, ' Outcome Index: ', outcome_index
+        print('Total Loss is invalid.  It is: ', total_loss, ' A Num Dice: ', a_num_dice, 'D Num Dice: ', d_num_dice, ' Outcome Index: ', outcome_index)
    
     return attacker_loss, defender_loss, outcome_probability
    
@@ -1043,7 +1122,7 @@ def simulateAttack(input_state, action):
         if action.type == 'Attack':
             cur_prob = simulateAttackAction(cur_state, action, i)
         else:
-            print 'ILLEGAL ACTION TYPE'
+            print('ILLEGAL ACTION TYPE')
         
         nextType(cur_state, action)
         successor_states.append(cur_state)
@@ -1064,9 +1143,9 @@ def simulateAttackAction(state, action, outcome_index):
   
     #MAKE SURE THIS IS VALID
     if state.owners[a_idx] != state.current_player or state.owners[d_idx] == state.current_player or state.armies[a_idx] <= 1: 
-        print 'INVALID ATTACK ACTION: '
+        print('INVALID ATTACK ACTION: ')
         action.print_action()
-        print 'NO ATTACK ACTION WILL BE TAKEN'
+        print('NO ATTACK ACTION WILL BE TAKEN')
         return 
   
     #Set last attacker and defender variables in the state
@@ -1081,14 +1160,10 @@ def simulateAttackAction(state, action, outcome_index):
     d_num_dice = min(2, state.armies[d_idx])
 
     if state.armies[d_idx] == 0:
-        print 'THERE ARE NO ARMIES IN TERRITORY: ', state.board.territories[d_idx].name
-        print 'ACTION: ', action.print_action()
-        print 'State: ', state.print_state()
-    
-    #print 'Number of attacker armies : ', state.armies[a_idx]
-    #print 'Number of defender armies : ', state.armies[d_idx]
-    #print 'Attack with : ', a_num_dice, 'attacker dice, and ', d_num_dice, 'defender dice'
-    
+        print('THERE ARE NO ARMIES IN TERRITORY: ', state.board.territories[d_idx].name)
+        print('ACTION: ', action.print_action())
+        print('State: ', state.print_state())
+        
     #Get the outcome and probability for the input outcome index
     a_loss, d_loss, outcome_probability = getAttackOutcome(a_num_dice, d_num_dice, outcome_index)
     
@@ -1108,9 +1183,10 @@ def simulateAttackAction(state, action, outcome_index):
     return outcome_probability
     
 def getOccupyActions(state):
-    """Returns a list of all the Occupy actions possible in this state"""
-    
-    #An action is to move an amount of troops into the newly conquered country (must leave at least 1 behind, and must move at least min(3,number_there -1))
+    """
+     Returns a list of all the Occupy actions possible in this state
+     An action is to move an amount of troops into the newly conquered country (must leave at least 1 behind, and must move at least min(3,number_there -1))
+    """
     actions = []
     
     if state.last_defender is None or state.last_attacker is None:
@@ -1135,14 +1211,14 @@ def simulateOccupyAction(state, action):
     #Make sure that the occupy action is correctly constructed
     if to_idx != state.last_defender or from_idx != state.last_attacker or state.armies[from_idx] - action.troops < 1 or state.owners[from_idx] != state.current_player or state.owners[to_idx] != state.current_player:
         #This move is invalid
-        print 'INVALID OCCUPY ACTION: '
+        print('INVALID OCCUPY ACTION: ')
         action.print_action()
-        print 'To index = ', to_idx
-        print 'Last defender = ', state.last_defender
-        print 'From index = ', from_idx
-        print 'Last attacker = ', state.last_attacker
+        print('To index = ', to_idx)
+        print('Last defender = ', state.last_defender)
+        print('From index = ', from_idx)
+        print('Last attacker = ', state.last_attacker)
         
-        print 'NO OCCUPY ACTION WILL BE TAKEN'
+        print('NO OCCUPY ACTION WILL BE TAKEN')
         pause()
         return 
 
@@ -1150,9 +1226,10 @@ def simulateOccupyAction(state, action):
     state.armies[from_idx] = state.armies[from_idx] - action.troops
     
 def getFortifyActions(state):
-    """Returns a list of all the Fortify actions possible in this state"""
-    
-    #An action is to move troops from one territory to a neighboring territory (both owned by current_player), leaving at least 1 troop in the from_territory
+    """
+     Returns a list of all the Fortify actions possible in this state
+     An action is to move troops from one territory to a neighboring territory (both owned by current_player), leaving at least 1 troop in the from_territory
+    """
     actions = []
     
     for i in range(len(state.owners)):
@@ -1184,16 +1261,19 @@ def simulateFortifyAction(state, action):
     #Make sure that the fortify action is correctly constructed
     if state.armies[from_idx] - action.troops < 1 or state.owners[from_idx] != state.current_player or state.owners[to_idx] != state.current_player or to_idx not in state.board.territories[from_idx].neighbors:
         #This move is invalid
-        print 'INVALID FORTIFY ACTION: '
+        print('INVALID FORTIFY ACTION: ')
         action.print_action()
-        print 'NO FORTIFY ACTION WILL BE TAKEN'
+        print('NO FORTIFY ACTION WILL BE TAKEN')
         return 
         
     state.armies[to_idx] = state.armies[to_idx] + action.troops
     state.armies[from_idx] = state.armies[from_idx] - action.troops
     
 def createRiskBoard():
-    """Creates a RiskBoard from the current riskengine state.  Used to interface with the GUI that allows humans to play the AIs"""
+    """
+     Creates a RiskBoard from the current riskengine state.  
+     Used to interface with the GUI that allows humans to play the AIs
+    """
     
     board = RiskBoard()
     
@@ -1239,19 +1319,33 @@ def createRiskBoard():
     return board
     
 def createRiskState(board, function_name, occupying=None):
-    """Creates a RiskState from the current riskengine state.  Used to interface with the GUI that allows humans to play the AIs"""
+    """
+     Creates a RiskState from the current riskengine state.  
+     Used to interface with the GUI that allows humans to play the AIs
+    """
 
     #players, armies, owners, current_player, turn_type
-    #Create players
+    #Create players and save the current player
     players = []
     id_counter = 0
+    current_player = None #To store the current player
+
     for p in riskengine.playerorder:
         rp = RiskPlayer(p.name, id_counter, p.freeArmies, p.conqueredTerritory)
         for c in p.cards:
             rp.add_card(board.card_to_id[c.territory])
+
+        #See if this is the current player
+        if p.name == riskengine.currentplayer.name:
+            current_player = id_counter
+
         players.append(rp)
         id_counter += 1
     
+    if current_player is None:
+        print('STATE CREATION ERROR.  NO PLAYER IS CURRENT!')
+        sys.exit()
+
     #Create armies and owners
     armies = [0]*len(board.territories)
     owners = [None]*len(board.territories)
@@ -1259,11 +1353,7 @@ def createRiskState(board, function_name, occupying=None):
         idx = board.territory_to_id[t.name]
         if t.player is not None:
             armies[idx] = t.armies
-            owners[idx] = board.player_to_id[t.player.name]
-    
-    #Determine the current player
-    current_player_obj = filter(lambda x:x.name == riskengine.currentplayer.name, players)[0]
-    current_player = current_player_obj.id
+            owners[idx] = board.player_to_id[t.player.name]    
 
     turn_type = None
     if riskengine.phase == 'Preposition' and function_name == 'Assignment':
@@ -1300,13 +1390,12 @@ def createRiskState(board, function_name, occupying=None):
 
     return state
     
-    
 def getInitialState(board):
-    """Get the initial state for this board.  Shuffles the player order."""
+    """Get the initial state for this board."""
+    
     #Initialize the state with the information in the board
 
     free_armies = 45 - 5*(len(board.players)-1)
-    
 
     state_players = []
     for p in board.players:

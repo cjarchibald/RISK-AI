@@ -1,41 +1,19 @@
-"""This does the graphics work for the program."""
-
-"""This is a risk game, playable over the internet.
-Copyright (C) 2004 John Bauman
-
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
-of the License, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+"""
+This displays RISK game logs so that the games can be viewed
+It was modified from the RISK.pyw program included in this assignment 
+which was written by John Bauman
 """
 
 from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageTk
-from PIL import PngImagePlugin #for py2exe
-import Tkinter
-import tkSimpleDialog
-import tkFileDialog
-import tkMessageBox
+import tkinter as tk
 import xml.dom.minidom
 import random
-import cStringIO as StringIO
+import io
 import zipfile
 import gc
 import sys
-import time
-Image._initialized = 1 #for py2exe
-
-#import Tix
 
 import risktools
 
@@ -61,16 +39,16 @@ class Territory:
 class PlayerStats:
     """This is used to display the stats for a single player"""
     def __init__(self, master, **kwargs):
-        self.pframe = Tkinter.Frame(master, **kwargs)
+        self.pframe = tk.Frame(master, **kwargs)
         self.pack = self.pframe.pack
-        self.statlabel = Tkinter.Label(self.pframe)
-        self.statlabel.pack(fill=Tkinter.X)
-        self.statlabel2 = Tkinter.Label(self.pframe)
-        self.statlabel2.pack(fill=Tkinter.X)
-
+        self.statlabel = tk.Label(self.pframe)
+        self.statlabel.pack(fill=tk.X)
+        self.statlabel2 = tk.Label(self.pframe)
+        self.statlabel2.pack(fill=tk.X)
+        
     def set_id(self, id):
         self.id = id
-
+        
     def update_stats(self, player, state):
         """Update the player stats"""
         num_armies = 0
@@ -79,94 +57,94 @@ class PlayerStats:
             if state.owners[i] == player.id:
                 num_territories += 1
                 num_armies += state.armies[i]
-
+             
         self.statlabel.configure(text=player.name + " : " + str(num_armies) + " in " + str(num_territories) + " territories. " + str(player.free_armies) + " free", fg=playercolors[player.id], bg=backcolors[player.id])
-
+        
         #Make card string of first letters of card pictures
         cardstring = ""
         for c in player.cards:
             if len(cardstring) > 0:
                 cardstring = cardstring + ","
             cardstring = cardstring + str(state.board.cards[c].picture)[0]
-
+        
         self.statlabel2.configure(text="Cur Reinf: " + str(risktools.getReinforcementNum(state,player.id)) + " | Cards : " + cardstring, fg=playercolors[player.id], bg=backcolors[player.id])
         self.pack()
-
+            
 class PlayerList:
     """Actually lists the players."""
     def __init__(self, master, **kwargs):
         """Actually initialize it."""
-        self.listframe = Tkinter.Frame(master, **kwargs)
+        self.listframe = tk.Frame(master, **kwargs)
         self.pack = self.listframe.pack
         self.pstats = []
-
+        
     def append(self, player):
         """Append a player to this list."""
         newpstat = PlayerStats(self.listframe)
         newpstat.pack()
         newpstat.set_id(player.id)
         self.pstats.append(newpstat)
-        self.pack(fill=Tkinter.X)
-
+        self.pack(fill=tk.X)
+        
     def updateList(self, state):
         for p in state.players:
             for ps in self.pstats:
                 if p.id == ps.id:
                     ps.update_stats(p, state)
-
-
+        
+            
 class StatBoard:
     """Displays stats about current state"""
     def __init__(self, master, **kwargs):
         """Initialize it."""
-        self.statframe = Tkinter.Frame(master, **kwargs)
+        self.statframe = tk.Frame(master, **kwargs)
         self.pack = self.statframe.pack
         self.pstats = PlayerList(self.statframe)
-        self.pstats.pack(fill=Tkinter.X)
-        self.sep3 = Tkinter.Frame(self.statframe,height=1,width=50,bg="black")
-        self.sep3.pack(fill=Tkinter.X)
-        self.curturnnum = Tkinter.Label(self.statframe, text="Turn Number: ")
-        self.curturnnum.pack(fill=Tkinter.X)
-        self.curturnin = Tkinter.Label(self.statframe, text="Next Card Turn-in Value: ")
-        self.curturnin.pack(fill=Tkinter.X)
-        self.sep1 = Tkinter.Frame(self.statframe,height=1,width=50,bg="black")
-        self.sep1.pack(fill=Tkinter.X)
-        self.curplayer = Tkinter.Label(self.statframe, text="Current Player:")
-        self.curplayer.pack(fill=Tkinter.X)
-        self.turntype = Tkinter.Label(self.statframe, text="Turn Type:")
-        self.turntype.pack(fill=Tkinter.X)
-        self.sep1 = Tkinter.Frame(self.statframe,height=1,width=50,bg="black")
-        self.sep1.pack(fill=Tkinter.X)
-        self.lastplayer = Tkinter.Label(self.statframe, text="Last Player:")
-        self.lastplayer.pack(fill=Tkinter.X)
+        self.pstats.pack(fill=tk.X)
+        self.sep3 = tk.Frame(self.statframe,height=1,width=50,bg="black") 
+        self.sep3.pack(fill=tk.X)
+        self.curturnnum = tk.Label(self.statframe, text="Turn Number: ")
+        self.curturnnum.pack(fill=tk.X)
+        self.curturnin = tk.Label(self.statframe, text="Next Card Turn-in Value: ")
+        self.curturnin.pack(fill=tk.X)
+        self.sep1 = tk.Frame(self.statframe,height=1,width=50,bg="black") 
+        self.sep1.pack(fill=tk.X)
+        self.curplayer = tk.Label(self.statframe, text="Current Player:")
+        self.curplayer.pack(fill=tk.X)
+        self.turntype = tk.Label(self.statframe, text="Turn Type:")
+        self.turntype.pack(fill=tk.X)
+        self.sep1 = tk.Frame(self.statframe,height=1,width=50,bg="black") 
+        self.sep1.pack(fill=tk.X)
+        self.lastplayer = tk.Label(self.statframe, text="Last Player:")
+        self.lastplayer.pack(fill=tk.X)
 
-        self.action = Tkinter.Label(self.statframe, text="Last Action:")
-        self.action.pack(fill=Tkinter.X)
-        self.sep2 = Tkinter.Frame(self.statframe,height=1,width=50,bg="black")
-        self.sep2.pack(fill=Tkinter.X)
-
+        self.action = tk.Label(self.statframe, text="Last Action:")
+        self.action.pack(fill=tk.X)
+        self.sep2 = tk.Frame(self.statframe,height=1,width=50,bg="black") 
+        self.sep2.pack(fill=tk.X)
+        
     def add_player(self, player):
         """Add a player to the statBoard"""
         self.pstats.append(player)
         self.pack()
-
+        
     def update_statBoard(self, state, last_action, last_player):
         """Update the players on the statBoard"""
         self.pstats.updateList(state)
-        self.curturnnum.configure(text="Turn Number: " + str(turn_number))
+        self.curturnnum.configure(text="Turn # " + str(turn_number) + " - State # " + str(state_number))
         self.curturnin.configure(text="Next Card Turn-in Value: " + str(risktools.getTurnInValue(state)))
         self.curplayer.configure(text="Current Player: " + state.players[state.current_player].name)
-        if last_player is not None:
+        if last_player is not None: 
             self.lastplayer.configure(text="Last Player: " + state.players[last_player].name)
         self.turntype.configure(text="Turn Type: " + state.turn_type)
         self.action.configure(text="Last Action: " + last_action.description(True))
-
+        
     def log_over(self):
         self.curplayer.configure(text="LOG FILE IS OVER!")
-
+            
 def opengraphic(fname):
     """Load an image from the specified zipfile."""
-    stif = StringIO.StringIO(zfile.read(fname))
+    stif = io.BytesIO(zfile.read(fname))
     im = Image.open(stif)
     im.load()
     stif.close()
@@ -178,68 +156,70 @@ def drawarmy(t, from_territory=0):
     terr = territories[riskboard.territories[t].name]
     canvas.delete(terr.name + "-a")
     if current_state.owners[t] is not None:
-        canvas.create_rectangle(terr.cx + terr.x - 7, terr.cy + terr.y - 7,
-                                terr.cx + terr.x + 7, terr.cy + terr.y+ 7,
-                                fill=backcolors[current_state.owners[t]],
+        canvas.create_rectangle(terr.cx + terr.x - 7, terr.cy + terr.y - 7, 
+                                terr.cx + terr.x + 7, terr.cy + terr.y+ 7, 
+                                fill=backcolors[current_state.owners[t]], 
                                 tags=(terr.name + "-a",))
-        canvas.create_text(terr.cx + terr.x, terr.cy + terr.y,
+        canvas.create_text(terr.cx + terr.x, terr.cy + terr.y, 
                            text=str(current_state.armies[t]), tags=(riskboard.territories[t].name + "-a",), fill=playercolors[current_state.owners[t]])
     else:
-        canvas.create_text(terr.cx + terr.x, terr.cy + terr.y,
+        canvas.create_text(terr.cx + terr.x, terr.cy + terr.y, 
                            text=str(0), tags=(terr.name + "-a",))
 
 def hex_to_rgb(value):
     value = value.lstrip('#')
     lv = len(value)
-    return (int(value[0:0+lv/3],16), int(value[lv/3:2*lv/3],16), int(value[2*lv/3:lv],16), 255)
-
-
+    ti = int(lv/3)
+    return (int(value[0:ti],16), int(value[ti:2*ti],16), int(value[2*ti:lv],16), 255) 
+                           
+                           
 def drawterritory(t, color=None):
     """Draw an entire territory (will draw in color provided, default is owning player's color)"""
     terr = territories[str(riskboard.territories[t].name)]
-
+    
     #Create colored version of the image
-    canvas.delete(terr.name)
-
+    canvas.delete(terr.name) 
+    
     if len(backcolors) > 0 and current_state.owners[t] is not None:
         for fp in terr.floodpoints:
             if color:
                 ImageDraw.floodfill(terr.photo, fp, color)
             else:
                 ImageDraw.floodfill(terr.photo, fp, hex_to_rgb(backcolors[current_state.owners[t]]))
-
+                
     terr.currentimage = ImageTk.PhotoImage(terr.photo)
-    canvas.create_image(terr.x, terr.y, anchor=Tkinter.NW,
-                            image=terr.currentimage, tags=(terr.name,))
+    canvas.create_image(terr.x, terr.y, anchor=tk.NW, 
+                            image=terr.currentimage, tags=(terr.name,))  
     drawarmy(t, 1)
 
-
-#make 7 possible colors - should be enough for anyone
-possiblecolors = [(0,0,128),(128,0,0),(128,0,128),(0,128,0),(0,128,128),(128,128,0), (255,0,0), (0,255,255)]
+           
+#make 7 possible colors - should be enough for anyone        
+possiblecolors = [(0,0,128),(128,0,0),(128,0,128),(0,128,0),(255,128,0),(0,128,255), (255,0,0), (0,255,255)]
 
 def makeplayercolors(player):
     """Make the colors for a player"""
     colo = possiblecolors[0]
     possiblecolors.remove(colo)
     col = colo[0] * 2**16 + colo[1] * 2**8 + colo[2]
-
-    back = 2**24-1 - col
+    
+    back = 2**24-1
     pc = hex(col)[2:]
     pc = "0" * (6 - len(pc)) + pc
     backcolors.append("#" + pc)
+
     pc = hex(back)[2:]
     pc = "0" * (6 - len(pc)) + pc
     playercolors.append("#" + pc)
-
+    
 playercolors = []
 backcolors = []
-
+    
 def newplayer(p):
     """Create a new player"""
     makeplayercolors(p)
     statbrd.add_player(p)
-
-
+    
+                              
 def loadterritorygraphics(xmlFile):
     """Load graphics information/graphics from a file"""
     global territories
@@ -261,9 +241,9 @@ def loadterritorygraphics(xmlFile):
             fpx = int(fp.getAttribute("x"))
             fpy = int(fp.getAttribute("y"))
             fps.append((fpx,fpy))
-
+        
         shaded = opengraphic(grafile)
-
+        
         t = Territory(tname, x, y, w, h, cx, cy)
         t.photo = shaded
         t.shadedimage = ImageTk.PhotoImage(shaded)
@@ -273,7 +253,7 @@ def loadterritorygraphics(xmlFile):
         del shaded
 
 playing = False
-
+        
 def toggle_playing():
     global playing, play_button
     if playing:
@@ -282,61 +262,73 @@ def toggle_playing():
     else:
         playing = True
         play_button.config(text="Pause")
-
+      
 play_button = None
-
+      
 def play_log():
+    global current_state
     if playing:
         nextstate()
-    root.after(500, play_log)
-
+    #delay = 500
+    delay = 50
+    #if current_state.turn_type == 'Place' or current_state.turn_type == 'PrePlace':
+    if current_state.turn_type == 'Place':
+        num_free = current_state.players[current_state.current_player].free_armies 
+        if num_free > 3:
+            delay = 50
+        elif num_free > 1:
+            delay = 250
+        
+    root.after(delay, play_log)
+      
 def setupdata():
     """Start the game"""
     global territories, canvas, root, gameMenu, playerMenu
     global totim, zfile, statbrd, play_button
-
-    root = Tkinter.Tk()
+    
+    root = tk.Tk()
     root.title("PyRiskGameViewer")
-
+    
     zfile = zipfile.ZipFile("world.zip")
     graphics = xml.dom.minidom.parseString(zfile.read("territory_graphics.xml"))
-    loadterritorygraphics(graphics)
-
-    totalframe = Tkinter.Frame(root)
-    lframe = Tkinter.Frame(totalframe)
+    loadterritorygraphics(graphics)   
+    
+    totalframe = tk.Frame(root)
+    lframe = tk.Frame(totalframe)
     statbrd = StatBoard(lframe, bd=2)
-    statbrd.pack(anchor=Tkinter.N, fill=Tkinter.Y, expand=Tkinter.NO)
-    Tkinter.Button(lframe, text="Next State",
+    statbrd.pack(anchor=tk.N, fill=tk.Y, expand=tk.NO)
+    tk.Button(lframe, text="Next State", 
                    command = nextstate).pack(padx=15,pady=15)
-    lframe.pack(side=Tkinter.LEFT, anchor=Tkinter.S, fill=Tkinter.Y)
-    play_button = Tkinter.Button(lframe, text="Play", command = toggle_playing)
+    lframe.pack(side=tk.LEFT, anchor=tk.S, fill=tk.Y)
+    play_button = tk.Button(lframe, text="Play", command = toggle_playing)
     play_button.pack(padx=15,pady=15)
-    lframe.pack(side=Tkinter.LEFT, anchor=Tkinter.S, fill=Tkinter.Y)
-
-    canvas = Tkinter.Canvas(totalframe,
-                            height=graphics.childNodes[0].getAttribute("height"),
+    lframe.pack(side=tk.LEFT, anchor=tk.S, fill=tk.Y)
+   
+    canvas = tk.Canvas(totalframe, 
+                            height=graphics.childNodes[0].getAttribute("height"), 
                             width=graphics.childNodes[0].getAttribute("width"))
 
     boardname = graphics.getElementsByTagName("board")[0].childNodes[0].data
     total = opengraphic(boardname)
     totim = ImageTk.PhotoImage(total)
-    canvas.create_image(0, 0, anchor=Tkinter.NW, image=totim, tags=("bgr",))
+    canvas.create_image(0, 0, anchor=tk.NW, image=totim, tags=("bgr",))
     for terr in range(len(riskboard.territories)):
         drawterritory(terr, 0)
-
+    
     del total
-
-    canvas.pack(side=Tkinter.RIGHT, expand=Tkinter.YES, fill=Tkinter.BOTH)
-    totalframe.pack(expand=Tkinter.YES, fill=Tkinter.BOTH)#set up message area
-
+    
+    canvas.pack(side=tk.RIGHT, expand=tk.YES, fill=tk.BOTH)    
+    totalframe.pack(expand=tk.YES, fill=tk.BOTH)#set up message area
+    
     gc.collect()
-
+    
     play_log()
-
+    
 logfile = None
 current_state = None
 riskboard = None
 turn_number = 0
+state_number = 0
 
 def display_current_state(last_action):
     if len(backcolors) == 0:
@@ -350,18 +342,18 @@ def display_current_state(last_action):
     #Draw territories that might have changed
     changed_t = [last_action.to_territory, last_action.from_territory]
     prev_t = []
-
+    
     if previous_action and previous_action.type != 'TurnInCards':
         prev_t = [previous_action.to_territory, previous_action.from_territory]
     if last_action.type != 'TurnInCards':
         for t in changed_t:
             if t is not None and t not in prev_t:
                 tidx = current_state.board.territory_to_id[t]
-                drawterritory(tidx, (255,255,0))
+                drawterritory(tidx, (255,255,0, 255))
             if t is not None:
                 tidx = current_state.board.territory_to_id[t]
                 drawarmy(tidx)
-
+            
     #Redraw the old territories normal again
     if previous_action and previous_action.type != 'TurnInCards':
         for t in prev_t:
@@ -369,13 +361,20 @@ def display_current_state(last_action):
                 tidx = current_state.board.territory_to_id[t]
                 drawterritory(tidx)
 
+    if previous_action and previous_action.type == 'TurnInCards':
+        # toggle_playing()
+        # print("TURNED IN CARDS!!!")
+        for i in [previous_action.to_territory, previous_action.from_territory, previous_action.troops]:
+            if i is not None:
+                t = current_state.board.cards[i].territory
+                drawterritory(t)  #Cards store territory id
 
+            
 def nextstate(read_action=True):
-    global current_state, logover, previous_action, previous_player, playing, turn_number
-    logover = False
+    global current_state, logover, previous_action, previous_player, playing, turn_number, state_number
 
     if logover:
-        print 'LOG IS OVER NOW!'
+        print('LOG IS OVER NOW!')
         statbrd.log_over()
         playing = False
         return
@@ -385,33 +384,40 @@ def nextstate(read_action=True):
             newline = logfile.readline()
             splitline = newline.split('|')
             if not newline or splitline[0] == 'RISKRESULT':
-                print 'We have reached the end of the logfile'
-                print newline
+                print('We have reached the end of the logfile')
+                print(newline)
                 logover = True
             else:
                 last_action.from_string(newline) #This gets next action
         if not logover:
             current_state.from_string(logfile.readline(),riskboard)
     if not logover:
+#        print("CURRENT STATE THAT IS BEING DISPLAYED:")
+#        current_state.print_state()
         display_current_state(last_action)
     previous_action = last_action
     if current_state.current_player != previous_player:
         turn_number += 1
+    state_number += 1
     previous_player = current_state.current_player
 
     if not logover and current_state.turn_type == 'GameOver':
         logover = True
         if logfile is not None:
             newline = logfile.readline()
-            print 'GAME OVER:  RESULT:'
-            print newline
-
-previous_action = None
+            print('GAME OVER:  RESULT:')
+            print(newline)
+        
+previous_action = None        
 logover = False
 previous_player = None
-
+    
 if __name__ == "__main__":
     #Set things up then call root.mainloop
+    if len(sys.argv) < 2:
+        print('Requires logfile!')
+        sys.exit()
+
     logfile = open(sys.argv[1]) #This is passed in
     l1 = logfile.readline() #Board
     #Set up risk stuff

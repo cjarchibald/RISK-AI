@@ -1,0 +1,17 @@
+- HasFirstTurn < 0 > ( 0.5  ,  0.5  ) ,  20  examples   reached here
+- - Quebec < 6 > ( 0.9  ,  0.1  ) ,  10  examples   reached here
+- - - ( 0.666666666667  ,  0.333333333333  ) ,  3  examples reached here
+- - - ( 1.0  ,  0.0  ) ,  7  examples reached here
+- - Western Australia < 41 > ( 0.1  ,  0.9  ) ,  10  examples   reached here
+- - - ( 0.333333333333  ,  0.666666666667  ) ,  3  examples reached here
+- - - ( 0.0  ,  1.0  ) ,  7  examples reached here
+Learned tree. Saving to file
+Saved file to  pa2_trees\Dataset_10_attacker_ai_P1_attacker_ai_P2_20141112-120947_3.dtree
+Loading tree.
+- < 0 > ( 0.5  ,  0.5  )
+- - < 6 > ( 0.9  ,  0.1  )
+- - - ( 0.666666666667  ,  0.333333333333  )
+- - - ( 1.0  ,  0.0  )
+- - < 41 > ( 0.1  ,  0.9  )
+- - - ( 0.333333333333  ,  0.666666666667  )
+- - - ( 0.0  ,  1.0  )

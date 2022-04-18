@@ -20,14 +20,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 import sys
 
-import riskgui
-import riskengine
+from gui import riskgui
+from gui import riskengine
 
 try:
-    import psyco  # can't hurt - speeds up AI for autogames
+    import psyco #can't hurt - speeds up AI for autogames
     psyco.full()
 except:
-    pass  # too bad
+    pass #too bad
 
 __version__ = "0.7.1"
 
@@ -40,6 +40,3 @@ riskengine.loadterritories()
 riskgui.setupdata()
 riskgui.rungame()
 
-
-#import riskguigtk
-# riskguigtk.run()
